@@ -1,0 +1,23 @@
+import Icon from '../../components/Icon'
+
+export default function DashboardPage({ store, setPage }) {
+  const { applications, hours, courses } = store
+  const totalHours = hours.reduce((sum, item) => sum + Number(item.hours), 0)
+  const pay = hours.reduce((sum, item) => sum + Number(item.hours) * Number(item.rate), 0)
+  const active = applications.filter((item) => !['Rejected', 'Saved'].includes(item.status)).length
+  const interviews = applications.filter((item) => item.status === 'Interview').length
+  const learning = courses.length ? Math.round(courses.reduce((sum, item) => sum + Number(item.progress), 0) / courses.length) : 0
+  return <div className="page dashboard-page">
+    <section className="welcome-row"><div><p className="eyebrow">YOUR CAREER, IN MOTION</p><h1>Good morning, Faisal <span>✦</span></h1><p className="subtle">A focused system for the opportunities you are creating.</p></div><div className="streak"><span className="streak-icon">♨</span><div><strong>Start your streak</strong><small>Add your first entry today</small></div></div></section>
+    <section className="stat-grid"><Stat icon="briefcase" tone="coral-bg" label="Active applications" value={active}/><Stat icon="target" tone="purple-bg" label="Interviews" value={interviews}/><Stat icon="clock" tone="yellow-bg" label="Hours logged" value={totalHours.toFixed(1)} unit="h"/><Stat icon="book" tone="mint-bg" label="SAP learning" value={learning} unit="%"/></section>
+    <section className="dashboard-grid">
+      <article className="panel"><PanelHead kicker="JOB SEARCH" title="Application pipeline" action="Open applications" onClick={() => setPage('applications')}/><EmptyOrList empty={!applications.length} icon="briefcase" title="No applications yet" text="Start tracking every role you find." button="Add application" onClick={() => setPage('applications')}>{applications.slice(0, 3).map((item) => <div className="application-row" key={item.id}><span className="company-logo">{item.company[0]}</span><div className="app-info"><strong>{item.company}</strong><span>{item.role} · {item.type}</span></div><span className={`pill ${item.status.toLowerCase()}`}>{item.status}</span></div>)}</EmptyOrList></article>
+      <article className="panel"><PanelHead kicker="CURRENT JOB" title="Work hours" action="Log hours" onClick={() => setPage('hours')}/><EmptyOrList empty={!hours.length} icon="clock" title="Nothing logged this week" text="Log shifts to see your hours and estimated pay." button="Log hours" onClick={() => setPage('hours')}><div className="hours-summary"><strong>{totalHours.toFixed(1)}<em>h</em></strong><p>€{pay.toFixed(2)} estimated gross pay</p></div></EmptyOrList></article>
+      <article className="panel learning-panel"><PanelHead kicker="SKILL BUILDING" title="SAP learning journey" action="Open learning" onClick={() => setPage('learning')}/><EmptyOrList empty={!courses.length} icon="book" title="Build your SAP learning plan" text="Add the courses, certifications, or topics you want to master." button="Add a course" onClick={() => setPage('learning')}>{courses.slice(0, 3).map((item) => <div className="course-row" key={item.id}><span className="course-icon mint"><Icon name="book" size={17}/></span><div className="course-main"><div><strong>{item.title}</strong><span>{item.completed || 0} / {item.total || '?'} lessons</span></div><div className="progress-track"><i style={{ width: `${item.progress}%` }}/></div></div><span className="course-percent">{item.progress}%</span></div>)}</EmptyOrList></article>
+      <article className="quote-card"><span className="quote-mark">“</span><p>Your next opportunity is built one small action at a time.</p><span>Careerly for Faisal</span></article>
+    </section>
+  </div>
+}
+function Stat({ icon, tone, label, value, unit }) { return <article className="stat-card"><div className={`stat-icon ${tone}`}><Icon name={icon}/></div><p>{label}</p><strong>{value}{unit && <em>{unit}</em>}</strong><span className="stat-note">Updated as you add entries</span></article> }
+function PanelHead({ kicker, title, action, onClick }) { return <div className="panel-heading"><div><p className="section-kicker">{kicker}</p><h2>{title}</h2></div><button className="text-button" onClick={onClick}>{action} <Icon name="arrow" size={15}/></button></div> }
+function EmptyOrList({ empty, icon, title, text, button, onClick, children }) { return empty ? <div className="empty-state"><span><Icon name={icon}/></span><h3>{title}</h3><p>{text}</p><button className="soft-button" onClick={onClick}><Icon name="plus" size={15}/>{button}</button></div> : <div className="dashboard-list">{children}</div> }
