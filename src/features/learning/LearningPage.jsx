@@ -3,7 +3,16 @@ import Icon from '../../components/Icon'
 const blank = { title: '', total: '', completed: '', progress: 0, notes: '' }
 export default function LearningPage({ store }) {
   const [form, setForm] = useState(blank); const [editing, setEditing] = useState(null)
-  function submit(event) { event.preventDefault(); const complete = Number(form.completed) || 0; const total = Number(form.total) || 0; const entry = { ...form, progress: total ? Math.min(100, Math.round(complete / total * 100)) : Number(form.progress) || 0 }; editing ? store.updateCourse(editing, entry) : store.addCourse(entry); setForm(blank); setEditing(null) }
+  function submit(event) {
+    event.preventDefault()
+    const complete = Number(form.completed) || 0
+    const total = Number(form.total) || 0
+    const entry = { ...form, progress: total ? Math.min(100, Math.round(complete / total * 100)) : Number(form.progress) || 0 }
+    if (editing) store.updateCourse(editing, entry)
+    else store.addCourse(entry)
+    setForm(blank)
+    setEditing(null)
+  }
   function continueCourse(item) { const completed = Math.min(Number(item.total) || 0, Number(item.completed || 0) + 1); store.updateCourse(item.id, { completed, progress: item.total ? Math.round(completed / item.total * 100) : item.progress }) }
   return <div className="page feature-page"><section className="page-title"><div><p className="eyebrow">SKILL BUILDING</p><h1>SAP learning</h1><p className="subtle">Shape a learning journey you can return to every day.</p></div><button className="top-add" onClick={() => document.querySelector('#course-form').scrollIntoView({ behavior: 'smooth' })}><Icon name="plus" size={16}/>Add course</button></section>
     <section className="panel form-panel" id="course-form"><div><p className="section-kicker">{editing ? 'EDIT COURSE' : 'LEARNING PLAN'}</p><h2>{editing ? 'Update learning progress' : 'Add a course or topic'}</h2></div><form className="entry-form" onSubmit={submit}><label>Course / topic<input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required placeholder="e.g. SAP ABAP Fundamentals"/></label><div className="form-grid"><label>Lessons completed<input type="number" min="0" value={form.completed} onChange={(e) => setForm({ ...form, completed: e.target.value })} placeholder="0"/></label><label>Total lessons<input type="number" min="0" value={form.total} onChange={(e) => setForm({ ...form, total: e.target.value })} placeholder="e.g. 20"/></label></div><label>Notes <span>(optional)</span><textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Certification target, next chapter, useful resources…"/></label><div className="form-actions">{editing && <button type="button" className="soft-button" onClick={() => { setForm(blank); setEditing(null) }}>Cancel</button>}<button className="primary-action">{editing ? 'Save changes' : 'Add course'} <Icon name="arrow" size={16}/></button></div></form></section>

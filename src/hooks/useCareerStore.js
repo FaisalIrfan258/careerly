@@ -11,9 +11,10 @@ export function useCareerStore() {
   const [data, setData] = useState(emptyData)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const refresh = useCallback(async () => { try { setLoading(true); setError(''); setData(await request('/api/data')) } catch (err) { setError('Could not reach your data service. Start the API or check its database connection.') } finally { setLoading(false) } }, [])
+  const refresh = useCallback(async () => { try { setLoading(true); setError(''); setData(await request('/api/data')) } catch { setError('Could not reach your data service. Start the API or check its database connection.') } finally { setLoading(false) } }, [])
+  // eslint-disable-next-line react/set-state-in-effect
   useEffect(() => { refresh() }, [refresh])
-  const save = async (operation) => { try { setError(''); await operation(); await refresh() } catch (err) { setError(err.message) } }
+  const save = useCallback(async (operation) => { try { setError(''); await operation(); await refresh() } catch (err) { setError(err.message) } }, [refresh])
   const actions = useMemo(() => ({
     addApplication: (entry) => save(() => request('/api/applications', { method: 'POST', body: JSON.stringify(entry) })),
     updateApplication: (id, entry) => save(() => request(`/api/applications/${id}`, { method: 'PATCH', body: JSON.stringify(entry) })),
@@ -23,6 +24,6 @@ export function useCareerStore() {
     addCourse: (entry) => save(() => request('/api/courses', { method: 'POST', body: JSON.stringify(entry) })),
     updateCourse: (id, entry) => save(() => request(`/api/courses/${id}`, { method: 'PATCH', body: JSON.stringify(entry) })),
     removeCourse: (id) => save(() => request(`/api/courses/${id}`, { method: 'DELETE' })),
-  }), [refresh])
+  }), [save])
   return { ...data, ...actions, loading, error, refresh }
 }
