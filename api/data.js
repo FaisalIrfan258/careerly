@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     await ensureSchema()
     const [apps, hours, courses] = await Promise.all([
       pool.query('SELECT * FROM applications ORDER BY created_at DESC'),
-      pool.query('SELECT * FROM work_hours ORDER BY date DESC, created_at DESC'),
+      pool.query('SELECT id, date::text AS date, hours, rate, note, created_at FROM work_hours ORDER BY date DESC, created_at DESC'),
       pool.query('SELECT * FROM learning_courses ORDER BY created_at DESC'),
     ])
 
